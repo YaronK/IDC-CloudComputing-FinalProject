@@ -4,9 +4,9 @@ var
     config = require('./config'),
     express = require('express'),
     fs = require('fs'),
-    im = require('imagemagick'),
     log = require('./log.js'),
     process = require('process');
+    kMeans = require('kmeans-js');
 
 var app = express();
 
@@ -20,30 +20,36 @@ var s3 = new AWS.S3({
 app.post('/', bodyParser.json(), function (request, response) {
     log("Received message, body:" + JSON.stringify(request.body));
 
-    var fileName = request.body.fileName,
-        inputFilePath = "input/" + fileName,
-        outputFilePath = "output/" + fileName,
-        tempFilePath = "/tmp/" + fileName;
+    // var fileName = request.body.fileName,
+    //    inputFilePath = "input/" + fileName,
+    //    outputFilePath = "output/" + fileName,
+    //    tempFilePath = "/tmp/" + fileName;
+
+    var filename = "test.csv"
 
     s3.getObject({ Key: inputFilePath }, function (err, data) {
         if (err) { log(err); return; }
 
-        im.resize({
-            srcData: data.Body,
-            dstPath: tempFilePath,
-            width: 100
-        }, function (err) {
-            if (err) { log(err); return; }
+            console.log(data)
+            /** 
+            var data = [[1, 2, 3], [69, 10, 25]];
+            var km = new kMeans({
+                K: 2
+            });
 
-            s3.upload({
-                Key: outputFilePath,
-                Body: fs.createReadStream(tempFilePath),
-                ACL: "public-read"
-            }).send(function (err) { if (err) log(err); });
+            km.cluster(data);
+            while (km.step()) {
+                km.findClosestCentroids();
+                km.moveCentroids();
 
-            fs.unlink(tempFilePath);
-        });
+                console.log(km.centroids);
 
+                if(km.hasConverged()) break;
+            }
+
+            console.log('Finished in:', km.currentIteration, ' iterations');
+            console.log(km.centroids, km.clusters);
+            */
         s3.deleteObject({ Key: inputFilePath }, function (err) { if (err) log(err); });
     });
 
