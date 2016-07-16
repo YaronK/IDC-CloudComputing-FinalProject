@@ -18,19 +18,28 @@ var s3 = new AWS.S3({
 var s3bucketHref = s3.endpoint.href + config.aws.s3.bucket + "/";
 var sqs = new AWS.SQS({ params: { QueueUrl: config.aws.sqs.queueUrl } });
 
-var outputS3Prefix = "output/";
+var datasetsS3Prefix = "datasets/";
+var resultsS3Prefix = "results/";
+
+function getFileNames(directoryPrefix, onSuccess, onFailure) {
+  s3.listObjects({ Prefix: directoryPrefix }, function (err, data) {
+    if (err) { onFailure(err) }
+    else {
+      var keys = data.Contents.map(function (object) { return object.Key; });
+      keys.splice(keys.indexOf(directoryPrefix), 1);
+      var fileNames = keys.map(function (key) { return key.substring(directoryPrefix.length) });
+      onSuccess(fileNames);
+    }
+  });
+}
 
 function renderError(res, err) { res.render('error', { message: err.message, error: err }); }
 function renderAllResults(res) {
-  s3.listObjects({ Prefix: outputS3Prefix }, function (err, data) {
-    if (err) { log(err); renderError(res, err); }
-    else {
-      var keys = data.Contents.map(function (object) { return object.Key; });
-      keys.splice(keys.indexOf(outputS3Prefix), 1);
-      var resultIds = keys.map(function (key) { return key.substring(outputS3Prefix.length) });
-      res.render('all-results', { resultIds: resultIds });
-    }
-  });
+  getFileNames(
+    resultsS3Prefix,
+    function (fileNames) { res.render('all-results', { resultIds: fileNames }); },
+    function (err) { log(err); renderError(res, err); }
+  );
 }
 
 router.get('/', function (req, res, next) {
@@ -44,12 +53,16 @@ router.get('/all-results', function (req, res, next) {
 router.get('/single-result/:resultId', function (req, res, next) {
   res.render('single-result', {
     resultId: req.params.resultId,
-    resultLink: s3bucketHref + outputS3Prefix + req.params.resultId
+    resultLink: s3bucketHref + resultsS3Prefix + req.params.resultId
   });
 });
 
 router.get('/cluster-dataset', function (req, res, next) {
-  res.render('cluster-dataset', { dataset_names: ["1", "2"] });
+  getFileNames(
+    datasetsS3Prefix,
+    function (fileNames) { res.render('cluster-dataset', { dataset_names: fileNames }); },
+    function (err) { log(err); renderError(res, err); }
+  );
 });
 
 router.post('/cluster-dataset', function (req, res, next) {
