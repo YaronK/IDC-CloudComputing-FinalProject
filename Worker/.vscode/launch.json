@@ -16,8 +16,8 @@
             ],
             "env": {
 				"NODE_ENV": "development",
-				"AWS_ACCESS_KEY_ID": "AKIAIN6I74A2T2NANMZQ",
-				"AWS_SECRET_KEY": "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"
+				"AWS_ACCESS_KEY_ID": "AKIAJNP6TLJBUSIHZLVA",
+				"AWS_SECRET_KEY": "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"
 			},
             "externalConsole": false,
             "sourceMaps": false,
