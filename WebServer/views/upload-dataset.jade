@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h4 Upload a dataset
+  form(method="post", enctype="multipart/form-data")
+    table
+      tr
+        td Dateset name:
+        td
+          input(type="text", name="dataset-name" required)
+      tr
+        td Local file:
+        td 
+          input(type="file", name="dataset-file" required)
+      tr
+        td
+          input(type="submit", value="Upload")

@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h4 Cluster a dataset
+  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="scripts/display-graph.js"></script>
+  form(method="post", enctype="multipart/form-data")
+    table
+      tr
+        td Dateset name:
+        td
+          select(name="dataset-name" required)
+            each dataset_name in dataset_names ? dataset_names : []
+              option(value=dataset_name)= dataset_name
+      tr
+        td Clustering method:
+        td
+          input(type="radio", name="clustering-method", value="k-means")
+          span k-means
+          br
+          input(type="radio", name="clustering-method", value="k-means")
+          span k-means
+      tr
+        td
+          input(type="submit", value="Submit")
