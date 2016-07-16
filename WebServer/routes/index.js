@@ -42,13 +42,9 @@ function renderAllResults(res) {
   );
 }
 
-router.get('/', function (req, res, next) {
-  renderAllResults(res);
-});
+router.get('/', function (req, res, next) { renderAllResults(res); });
 
-router.get('/all-results', function (req, res, next) {
-  renderAllResults(res);
-});
+router.get('/all-results', function (req, res, next) { renderAllResults(res); });
 
 router.get('/single-result/:resultId', function (req, res, next) {
   res.render('single-result', {
@@ -81,34 +77,27 @@ router.post('/cluster-dataset', function (req, res, next) {
     },
     function (err, data) {
       if (err != null) { renderError(res, err); }
-      else { res.render('cluster-dataset', { message: "Queued clustering." }); }
+      else { res.render('cluster-dataset', { message: "Queued request." }); }
     });
 });
 
 router.get('/upload-dataset', function (req, res, next) {
+
   res.render('upload-dataset');
 });
 
-//router.post('/', upload.single('image'), function (req, res, next) {
-//  if (!req.file) { renderIndex(res, "Please select an image first."); return; }
-//
-//  var localFilePath = req.file.path;
-//  var remoteFileName = req.file.filename + '.' + req.file.originalname.split('.').pop();
-//  var remoteFilePath = "input/" + remoteFileName;
-//
-//  s3.upload({ Key: remoteFilePath, Body: fs.createReadStream(localFilePath) }).
-//    send(function (err, data) {
-//      if (err != null) { renderError(res, err); }
-//      else {
-//        fs.unlink(localFilePath);
-//        sqs.sendMessage(
-//          { MessageBody: JSON.stringify({ fileName: remoteFileName }) },
-//          function (err, data) {
-//            if (err != null) { renderError(res, err); }
-//            else { renderIndex(res, req.file.originalname + " uploaded successfully") }
-//          });
-//      }
-//    });
-//});
+router.post('/upload-dataset', upload.single('dataset-file'), function (req, res, next) {
+  var localFilePath = req.file.path;
+  var remoteFilePath = datasetsS3Prefix + req.file.originalname;
+
+  s3.upload({ Key: remoteFilePath, Body: fs.createReadStream(localFilePath) }).
+    send(function (err, data) {
+      if (err != null) { renderError(res, err); }
+      else {
+        fs.unlink(localFilePath);
+        res.render('upload-dataset', { message: "Uploaded dataset." });
+      }
+    });
+});
 
 module.exports = router;

@@ -3,26 +3,24 @@ extends layout
 block content
   h4 Cluster a dataset
   form(method="post", content-type="application/json")
-    table
-      tr
-        td Dateset name:
-        td
-          select(name="dataset-name" required)
-            each dataset_name in dataset_names ? dataset_names : []
-              option(value=dataset_name)= dataset_name
-      tr
-        td Clustering method:
-        td
-          input(type="radio", name="clustering-method", value="k-means", checked)
-          span k-means
-        td
-          span k:
-          input(type="text", name="k-means-k", value=3)
-      tr
-        td
-        td
-          input(type="radio", name="clustering-method", value="k-means")
-          span k-means
-      tr
-        td
-          input(type="submit", value="Submit")
+    if message
+      h5= message
+    else
+      table
+        tr
+          td Dateset name:
+          td
+            select(name="dataset-name" required)
+              each dataset_name in dataset_names ? dataset_names : []
+                option(value=dataset_name)= dataset_name
+        tr
+          td Clustering method:
+          td
+            input(type="radio", name="clustering-method", value="k-means", checked)
+            span k-means
+          td
+            span k:
+            input(type="text", name="k-means-k", value=3)
+        tr
+          td
+            input(type="submit", value="Submit")
