@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h4 Clustering results
+  each resultId in resultIds ? resultIds : []
+    a(href= "/single-result/"+resultId)= resultId
+    br

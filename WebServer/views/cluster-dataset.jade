@@ -2,9 +2,7 @@ extends layout
 
 block content
   h4 Cluster a dataset
-  <script src="https://d3js.org/d3.v3.js"></script>
-  <script src="scripts/display-graph.js"></script>
-  form(method="post", enctype="multipart/form-data")
+  form(method="post", content-type="application/json")
     table
       tr
         td Dateset name:
@@ -15,9 +13,14 @@ block content
       tr
         td Clustering method:
         td
-          input(type="radio", name="clustering-method", value="k-means")
+          input(type="radio", name="clustering-method", value="k-means", checked)
           span k-means
-          br
+        td
+          span k:
+          input(type="text", name="k-means-k", value=3)
+      tr
+        td
+        td
           input(type="radio", name="clustering-method", value="k-means")
           span k-means
       tr

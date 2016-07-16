@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h4= "Reuslt: " + resultId
+  script(src="https://d3js.org/d3.v3.js")
+  script(src="/scripts/display-graph.js")
+  script displayGraph( "#{resultLink}" )
