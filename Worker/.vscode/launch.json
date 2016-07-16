@@ -15,8 +15,10 @@
                 "--nolazy"
             ],
             "env": {
-                "NODE_ENV": "development"
-            },
+				"NODE_ENV": "development",
+				"AWS_ACCESS_KEY_ID": "AKIAIN6I74A2T2NANMZQ",
+				"AWS_SECRET_KEY": "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"
+			},
             "externalConsole": false,
             "sourceMaps": false,
             "outDir": null

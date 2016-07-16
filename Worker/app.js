@@ -5,7 +5,8 @@ var
     express = require('express'),
     fs = require('fs'),
     log = require('./log.js'),
-    process = require('process');
+    process = require('process'),
+    csv = require("fast-csv"),
     kMeans = require('kmeans-js');
 
 var app = express();
@@ -17,8 +18,63 @@ var s3 = new AWS.S3({
     secretAccessKey: process.env.AWS_SECRET_KEY
 });
 
+app.get('/', bodyParser.json(), function (request, response) {
+    var filename = "test.csv"
+    var inputFilePath = filename
+    var params = {Key: inputFilePath};
+    output_path = "C:\\Users\\gilad\\Desktop\\" + filename;
+
+    //Get csv file from S3
+
+    var file = fs.createWriteStream(output_path);
+    file.on('close', function(){
+        console.log('done');  //prints, file created
+    });
+
+    s3.getObject(params, function(err, data) {
+    if (err) console.log(err, err.stack); // an error occurred
+    else{
+        console.log("Succsess reading csv file from s3");
+        console.log(data);
+        
+        
+        };     
+    });
+    
+    s3.getObject(params).createReadStream(function(err, data) {
+    if (err) console.log(err, err.stack); // an error occurred
+    else{
+        console.log("Succsess reading csv file from s3");
+        console.log(data);
+        
+        
+        };     
+    });
+
+    s3.getObject(params).createReadStream().pipe(file);
+
+
+
+    // Read csv file from disk 
+    fs.createReadStream(output_path)
+        .pipe(csv())
+        .on("data", function(data){
+        console.log(data);
+        })
+        .on("end", function(){
+            console.log("done");
+        });
+
+    request.on('end', function () {
+        response.sendStatus(200);
+    });
+    
+  
+
+});
+
 app.post('/', bodyParser.json(), function (request, response) {
-    log("Received message, body:" + JSON.stringify(request.body));
+    console.log("Received message, body:" + JSON.stringify(request.body));
 
     // var fileName = request.body.fileName,
     //    inputFilePath = "input/" + fileName,
