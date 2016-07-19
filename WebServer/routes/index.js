@@ -8,7 +8,6 @@ var
   router = express.Router();
 
 AWS.config.region = config.aws.region;
-upload = multer({ dest: 'uploads/' });
 
 var s3 = new AWS.S3({
   params: { Bucket: config.aws.s3.bucket },
@@ -17,6 +16,8 @@ var s3 = new AWS.S3({
 });
 var s3bucketHref = s3.endpoint.href + config.aws.s3.bucket + "/";
 var sqs = new AWS.SQS({ params: { QueueUrl: config.aws.sqs.queueUrl } });
+
+var upload = multer({ dest: 'uploads/' });
 
 var datasetsS3Prefix = "datasets/";
 var resultsS3Prefix = "results/";
@@ -42,18 +43,15 @@ function renderAllResults(res) {
   );
 }
 
-router.get('/', function (req, res, next) { renderAllResults(res); });
+router.get('/', function (req, res) { renderAllResults(res); });
 
-router.get('/all-results', function (req, res, next) { renderAllResults(res); });
+router.get('/all-results', function (req, res) { renderAllResults(res); });
 
-router.get('/single-result/:resultId', function (req, res, next) {
-  res.render('single-result', {
-    resultId: req.params.resultId,
-    resultLink: s3bucketHref + resultsS3Prefix + req.params.resultId
-  });
-});
+router.get('/single-result/:resultId', function (req, res) { res.render('single-result', { resultId: req.params.resultId }); });
 
-router.get('/cluster-dataset', function (req, res, next) {
+router.get('/single-result-data/:resultId', function (req, res) { s3.getObject({ Key: resultsS3Prefix + req.params.resultId }).createReadStream().pipe(res); });
+
+router.get('/cluster-dataset', function (req, res) {
   getFileNames(
     datasetsS3Prefix,
     function (fileNames) { res.render('cluster-dataset', { dataset_names: fileNames }); },
@@ -61,18 +59,13 @@ router.get('/cluster-dataset', function (req, res, next) {
   );
 });
 
-router.post('/cluster-dataset', function (req, res, next) {
-  var clusteringMethod = req.body["clustering-method"];
-  var datasetName = req.body["dataset-name"];
-  var kMeansK = req.body["k-means-k"];
+router.post('/cluster-dataset', function (req, res) {
   sqs.sendMessage(
     {
       MessageBody: JSON.stringify({
-        dataset: datasetName,
-        method: clusteringMethod,
-        params: {
-          kNum: kMeansK
-        },
+        dataset: req.body["dataset-name"],
+        method: req.body["clustering-method"],
+        params: { kNum: req.body["k-means-k"] }
       })
     },
     function (err, data) {
@@ -81,12 +74,9 @@ router.post('/cluster-dataset', function (req, res, next) {
     });
 });
 
-router.get('/upload-dataset', function (req, res, next) {
+router.get('/upload-dataset', function (req, res) { res.render('upload-dataset'); });
 
-  res.render('upload-dataset');
-});
-
-router.post('/upload-dataset', upload.single('dataset-file'), function (req, res, next) {
+router.post('/upload-dataset', upload.single('dataset-file'), function (req, res) {
   var localFilePath = req.file.path;
   var remoteFilePath = datasetsS3Prefix + req.file.originalname;
 
