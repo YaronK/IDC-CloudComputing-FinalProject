@@ -1,39 +1,82 @@
-var margin = { top: 20, right: 20, bottom: 30, left: 40 },
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+function getRadioButtonValue(name) {
+    var radios = document.getElementsByName(name);
+    for (var i = 0, length = radios.length; i < length; i++) {
+        if (radios[i].checked) {
+            return radios[i].value;
+        }
+    }
+}
 
-var x = d3.scale.linear()
-    .range([0, width]);
+function setRadioButtonValue(name, index) {
+    document.getElementsByName(name)[index].checked = true;
+}
 
-var y = d3.scale.linear()
-    .range([height, 0]);
+var firstFeatureName = "first-feature";
+var secondFeatureName = "second-feature";
+var labelColumnName = "species";
 
-var color = d3.scale.category10();
+var graphData;
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
+function initializeGraph(resultId) {
+    d3.tsv("/single-result-data/" + resultId, function (error, data) {
+        graphData = data;
+        var table = d3.select("#features");
+        Object.keys(data[0]).forEach(function (key) {
+            if (key === labelColumnName) { return; }
+            var row = table.append("tr");
+            [firstFeatureName, secondFeatureName].forEach(function (feature_name) {
+                var cell = row.append("td");
+                cell.append("input").
+                    attr("type", "radio").
+                    attr("name", feature_name).
+                    attr("value", key);
+                cell.append("span").text(key);
+            });
+        });
+        setRadioButtonValue(firstFeatureName, 0);
+        setRadioButtonValue(secondFeatureName, 1);
+    });
+}
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
+function displayGraph() {
+    var firstFeature = getRadioButtonValue(firstFeatureName);
+    var secondFeature = getRadioButtonValue(secondFeatureName);
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    d3.select("body").select("svg").remove();
 
-d3.tsv("/single-result-data/data.tsv", function (error, data) {
-    if (error) throw error;
+    var margin = { top: 20, right: 20, bottom: 30, left: 40 },
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
 
-    data.forEach(function (d) {
-        d.sepalLength = +d.sepalLength;
-        d.sepalWidth = +d.sepalWidth;
+    var x = d3.scale.linear()
+        .range([0, width]);
+
+    var y = d3.scale.linear()
+        .range([height, 0]);
+
+    var color = d3.scale.category10();
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    graphData.forEach(function (d) {
+        d[firstFeature] = +d[firstFeature];
+        d[secondFeature] = +d[secondFeature];
     });
 
-    x.domain(d3.extent(data, function (d) { return d.sepalWidth; })).nice();
-    y.domain(d3.extent(data, function (d) { return d.sepalLength; })).nice();
+    x.domain(d3.extent(graphData, function (d) { return d[secondFeature]; })).nice();
+    y.domain(d3.extent(graphData, function (d) { return d[firstFeature]; })).nice();
 
     svg.append("g")
         .attr("class", "x axis")
@@ -44,7 +87,7 @@ d3.tsv("/single-result-data/data.tsv", function (error, data) {
         .attr("x", width)
         .attr("y", -6)
         .style("text-anchor", "end")
-        .text("Sepal Width (cm)");
+        .text(secondFeature);
 
     svg.append("g")
         .attr("class", "y axis")
@@ -55,16 +98,16 @@ d3.tsv("/single-result-data/data.tsv", function (error, data) {
         .attr("y", 6)
         .attr("dy", ".71em")
         .style("text-anchor", "end")
-        .text("Sepal Length (cm)")
+        .text(firstFeature)
 
     svg.selectAll(".dot")
-        .data(data)
+        .data(graphData)
         .enter().append("circle")
         .attr("class", "dot")
         .attr("r", 3.5)
-        .attr("cx", function (d) { return x(d.sepalWidth); })
-        .attr("cy", function (d) { return y(d.sepalLength); })
-        .style("fill", function (d) { return color(d.species); });
+        .attr("cx", function (d) { return x(d[secondFeature]); })
+        .attr("cy", function (d) { return y(d[firstFeature]); })
+        .style("fill", function (d) { return color(d[labelColumnName]); });
 
     var legend = svg.selectAll(".legend")
         .data(color.domain())
@@ -84,9 +127,4 @@ d3.tsv("/single-result-data/data.tsv", function (error, data) {
         .attr("dy", ".35em")
         .style("text-anchor", "end")
         .text(function (d) { return d; });
-
-});
-
-function displayGraph(resultLink){
-    console.log(resultLink);
-};
+}

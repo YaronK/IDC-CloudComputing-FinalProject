@@ -3,5 +3,13 @@ extends layout
 block content
   h4= "Reuslt: " + resultId
   script(src="https://d3js.org/d3.v3.js")
+  form(action="#" onSubmit="displayGraph();return false;")
+    table(id="features")
+      tr
+        td 
+          b First feature
+        td
+          b Second feature
+    input(type="submit", value="Display")
   script(src="/scripts/display-graph.js")
-  script displayGraph( "#{resultLink}" )
+  script initializeGraph( "#{resultId}" )
