@@ -13,16 +13,16 @@ function setRadioButtonValue(name, index) {
 
 var firstFeatureName = "first-feature";
 var secondFeatureName = "second-feature";
-var labelColumnName = "species";
+var labelColumnName = "clusterIndex";
 
 var graphData;
 
 function initializeGraph(resultId) {
-    d3.tsv("/single-result-data/" + resultId, function (error, data) {
+    d3.csv("/single-result-data/" + resultId, function (error, data) {
         graphData = data;
         var table = d3.select("#features");
         Object.keys(data[0]).forEach(function (key) {
-            if (key === labelColumnName) { return; }
+            if (key === labelColumnName || key === "") { return; }
             var row = table.append("tr");
             [firstFeatureName, secondFeatureName].forEach(function (feature_name) {
                 var cell = row.append("td");
