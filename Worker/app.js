@@ -6,7 +6,7 @@ var
     fs = require('fs'),
     log = require('./log.js'),
     process = require('process'),
-    parse = require('csv-parse'),
+    csvParse = require('csv-parse'),
     kmeans = require('node-kmeans');
 
 var app = express();
@@ -33,35 +33,23 @@ app.post('/', bodyParser.json(), function (request, response) {
 });
 
 function initateKMeans(inputFilePath, kNum, response) {
-    
-    //Initiate parameters
-    inputFilePath = inputFilePath.toString();
-    var params = { Key: inputFilePath };
-    outputName = inputFilePath.replace('csv', '')
-    outputName = outputName.replace('datasets/', 'results/')
-    var output_path = outputName + "KMean." + kNum + ".csv";
+    var outputFilePath = inputFilePath.replace('datasets/', 'results/').replace('csv', "KMean." + kNum + ".csv");
 
-    // Get data from S3
-    s3.getObject(params, function (err, data) {
-        if (err) console.log(err, err.stack); // an error occurred
+    s3.getObject({ Key: inputFilePath }, function (err, data) {
+        if (err) console.log(err, err.stack);
         else {
             console.log("Succeeded reading csv file from s3");
-
-            // Parse data into a csv format
-            parse(data.Body.toString(), {}, function (err, output) {
-                firstRow = output.shift();
-
-                // Call KMean clustering function
-                kMeanClustering(output, firstRow, kNum, output_path, response);
+            csvParse(data.Body.toString(), {}, function (err, data) {
+                firstRow = data.shift();
+                kMeansClustering(data, firstRow, kNum, outputFilePath, response);
             });
         };
     });
 }
-function kMeanClustering(data, firstRow, kNum, output_path, response) {
+function kMeansClustering(data, firstRow, kNum, outputFilePath, response) {
     var vectors = data;
     var result = data;
 
-    // K Mean Clustering
     kmeans.clusterize(vectors, { k: kNum }, (err, res) => {
         if (err) console.error(err);
         else {
@@ -83,17 +71,17 @@ function kMeanClustering(data, firstRow, kNum, output_path, response) {
                 var line = infoArray.join(",");
                 lineArray.push(index == 0 ? "" + line : line);
             });
-            var csvContent = lineArray.join("\n");
 
             // Uplocad csv to S3
             var uploadParams = {
-                Key: output_path,
-                Body: csvContent
+                Key: outputFilePath,
+                Body: lineArray.join("\n")
             };
-            s3.putObject(uploadParams, function (err, data) {
+            var put = s3.putObject(uploadParams, function (err, data) {
                 console.log("Successfully uploaded csv to s3");
                 response.status(200).end();
             });
+            console.log("");
         }
     });
 }
