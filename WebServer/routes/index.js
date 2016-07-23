@@ -33,7 +33,7 @@ router.get('/single-result/:resultId', function (req, res) { rendering.renderSin
 router.get('/single-result-data/:resultId', function (req, res) { s3.getObject({ Key: resultsS3Prefix + req.params.resultId }).createReadStream().pipe(res); });
 
 router.get('/cluster-dataset', function (req, res) {
-  s3Utilities.getS3FileNames(
+  s3Utilities.getFileNames(
     s3,
     datasetsS3Prefix,
     function (fileNames) { rendering.renderClusterDatasetView(res, fileNames, null); },

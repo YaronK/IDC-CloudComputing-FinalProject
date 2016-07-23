@@ -2,7 +2,7 @@ var s3Utilities = require('../s3-utilities');
 
 module.exports = {
     renderAllResultsView: function (res, s3, resultsS3Prefix) {
-        s3Utilities.getS3FileNames(
+        s3Utilities.getFileNames(
             s3,
             resultsS3Prefix,
             function (fileNames) { res.render('all-results', { resultIds: fileNames }); },
