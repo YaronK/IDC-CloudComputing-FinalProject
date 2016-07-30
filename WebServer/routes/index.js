@@ -8,16 +8,14 @@ var
   rendering = require('../views/rendering'),
   s3Utilities = require('../s3-utilities');
 
+AWS.config.accessKeyId = config.aws.accessKeyId;
+AWS.config.secretAccessKey = config.aws.secretAccessKey;
 AWS.config.region = config.aws.region;
 
 var
   router = express.Router(),
   upload = multer({ dest: 'uploads/' }),
-  s3 = new AWS.S3({
-    params: { Bucket: config.aws.s3.bucket },
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY
-  }),
+  s3 = new AWS.S3({ params: { Bucket: config.aws.s3.bucket } }),
   sqs = new AWS.SQS({ params: { QueueUrl: config.aws.sqs.queueUrl } });
 
 var

@@ -11,12 +11,11 @@ var
 
 var app = express();
 
+AWS.config.accessKeyId = config.aws.accessKeyId;
+AWS.config.secretAccessKey = config.aws.secretAccessKey;
 AWS.config.region = config.aws.region;
-var s3 = new AWS.S3({
-    params: { Bucket: config.aws.s3.bucket },
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY
-});
+
+var s3 = new AWS.S3({ params: { Bucket: config.aws.s3.bucket } });
 
 app.get('/', bodyParser.json(), function (request, response) {
     var kNum = 3;
