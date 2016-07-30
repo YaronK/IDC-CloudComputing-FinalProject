@@ -45,7 +45,11 @@ router.post('/cluster-dataset', function (req, res) {
       MessageBody: JSON.stringify({
         dataset: req.body["dataset-name"],
         method: req.body["clustering-method"],
-        params: { kNum: req.body["k-means-k"] }
+        params: {
+          kNum: req.body["k-means-k"],
+          clusterMembers: req.body["clusterMembers"],
+          clusterRadius: req.body["clusterRadius"]
+        }
       })
     },
     function (err, data) {
