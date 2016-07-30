@@ -18,7 +18,11 @@ var
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_KEY
   }),
-  sqs = new AWS.SQS({ params: { QueueUrl: config.aws.sqs.queueUrl } });
+  sqs = new AWS.SQS({
+    params: { QueueUrl: config.aws.sqs.queueUrl },
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_KEY
+  });
 
 var
   datasetsS3Prefix = "datasets/",
@@ -47,7 +51,11 @@ router.post('/cluster-dataset', function (req, res) {
       MessageBody: JSON.stringify({
         dataset: req.body["dataset-name"],
         method: req.body["clustering-method"],
-        params: { kNum: req.body["k-means-k"] }
+        params: {
+          kNum: req.body["k-means-k"],
+          clusterMembers: req.body["clusterMembers"],
+          clusterRadius: req.body["clusterRadius"]
+        }
       })
     },
     function (err, data) {

@@ -18,9 +18,46 @@ block content
           td
             input(type="radio", name="clustering-method", value="k-means", checked)
             span k-means
+        tr
+          td
+          td
+          td
+            span K-Mean Parameters
+        tr
+          td
+          td
+          td
           td
             span k:
             input(type="text", name="k-means-k", value=3)
+        tr
+          td 
+          td 
+            input(type="radio", name="clustering-method", value="DBSCAN", checked)
+            span DBSCAN
+        tr
+          td
+          td
+            input(type="radio", name="clustering-method", value="OPTIC", checked)
+            span Optic
+        tr
+          td
+          td
+          td DBSCAN/Optic Paramaters
+        tr
+          td
+          td
+          td
+          td
+            span Cluster Radius:
+            input(type="text", name="clusterRadius", value=0.3)
+        tr
+          td
+          td
+          td
+          td
+            span Cluster Members:
+            input(type="text", name="clusterMembers", value=4)
         tr
           td
             input(type="submit", value="Submit")
