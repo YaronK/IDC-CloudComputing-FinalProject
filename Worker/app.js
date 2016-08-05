@@ -19,10 +19,12 @@ AWS.config.region = config.aws.region;
 var s3 = new AWS.S3({ params: { Bucket: config.aws.s3.bucket } });
 
 app.get('/', bodyParser.json(), function (request, response) {
+    sendSMS("iris.csv", "k-means");
     response.status(200).end();
 });
 
 app.post('/', bodyParser.json(), function (request, response) {
+    console.log("Recieved post request, initating worker");
     var inputFilePath = "datasets/" + request.body.dataset;
 
     // Fetching requested object
@@ -41,6 +43,7 @@ app.post('/', bodyParser.json(), function (request, response) {
 function initiateClustering(request, response, data, firstRow, inputFilePath) {
     console.log("Initating clustering method");
     var method = request.body.method.toString();
+    sendSMS(inputFilePath, method);
     console.log("Starting " + method + " Clustering, with " + inputFilePath + " as dataset");
 
     if (request.body.method.toString() == "k-means") {
@@ -144,6 +147,24 @@ function UploadingResults(firstRow, result, outputFilePath, response) {
         console.log("Successfully uploaded csv to s3");
         response.status(200).end();
     });
+}
+
+function sendSMS(dataset, method) {
+    console.log("Trying to send SMS");
+    var sns = new AWS.SNS({ region: 'us-west-2' });
+    sns.publish({
+        TargetArn: 'arn:aws:sns:us-west-2:079044478150:idc_cloudComputing_YaronKaner_GiladLevy_FP',
+        Message: "Succeeded clustering the dataset: " + dataset + " with " + method + " method",
+        Subject: "ClusteringMadness"
+    },
+        function (err, data) {
+            if (err) {
+                console.log("Error sending a message " + err);
+            } else {
+                console.log("Sent message: " + data.MessageId);
+
+            }
+        });
 }
 
 app.listen(process.env.PORT || '3000');
