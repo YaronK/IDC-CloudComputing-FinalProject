@@ -1,7 +1,13 @@
 extends layout
 
 block content
-  h4 Clustering results
-  each resultId in resultIds ? resultIds : []
-    a(href= "/single-result/"+resultId)= resultId
-    br
+  table(class="screen_wide")
+    each resultId in resultIds ? resultIds : []
+      tr(style={"height": "5vh"})
+        td(class="tab_wide")
+        td(class="tab_wide")
+        td(class="tab_wide content_tab")
+          a(href= "/single-result/"+resultId)= resultId
+          br
+    
+        

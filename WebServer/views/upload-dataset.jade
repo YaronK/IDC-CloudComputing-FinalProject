@@ -1,16 +1,20 @@
 extends layout
 
 block content
-  h4 Upload a dataset
-  form(method="post", enctype="multipart/form-data")
-    if message
-      h5= message
-    else
-      table
-        tr
-          td Local dataset file:
-          td 
-            input(type="file", name="dataset-file" required)
-        tr
-          td
-            input(type="submit", value="Upload")
+  table(class="screen_wide")
+    tr
+      td(class="tab_wide content_tab")
+        form(method="post", enctype="multipart/form-data")
+          if message
+            h5= message
+          else
+            table
+              tr
+                td Local dataset file:
+                td 
+                  input(type="file", name="dataset-file" required)
+              tr
+                td
+                  input(type="submit", value="Upload")
+      td(class="tab_wide")
+      td(class="tab_wide")

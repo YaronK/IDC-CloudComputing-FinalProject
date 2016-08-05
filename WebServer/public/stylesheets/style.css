@@ -1,12 +1,49 @@
 body {
-  padding: 50px;
+  padding-top: 5vh;
+  padding-left: 5vw;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
-  color: #00B7FF;
+  color: black;
 }
 
 td {
   padding-right: 5px;
+}
+
+#screen {
+  width: 90vw;
+  height: 90vh;
+}
+
+.screen_wide {
+  width: 90vw;
+}
+
+td.tab_wide {
+  width: 33%;
+}
+
+a.selected_tab {
+  color: white;
+}
+
+td.menu_tab {
+  background-color: grey;
+  text-align: center; 
+  display: table-cell;
+}
+
+td.content_tab {
+  background-color: lightgray;
+  display: table-cell;
+}
+
+td.selected_tab {
+  background-color: black;
+}
+
+.parameter_width {
+  width: 2vw;
 }

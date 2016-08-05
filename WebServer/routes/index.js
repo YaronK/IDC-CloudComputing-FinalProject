@@ -40,15 +40,16 @@ router.get('/cluster-dataset', function (req, res) {
 });
 
 router.post('/cluster-dataset', function (req, res) {
+  var clustering_method = req.body["clustering-method"];
   sqs.sendMessage(
     {
       MessageBody: JSON.stringify({
         dataset: req.body["dataset-name"],
-        method: req.body["clustering-method"],
+        method: clustering_method,
         params: {
           kNum: req.body["k-means-k"],
-          clusterMembers: req.body["clusterMembers"],
-          clusterRadius: req.body["clusterRadius"]
+          clusterMembers: clustering_method === "DBSCAN" ? req.body["DBSCANclusterMembers"] : req.body["OPTICclusterMembers"],
+          clusterRadius: clustering_method === "DBSCAN" ? req.body["DBSCANclusterRadius"] : req.body["OPTICclusterRadius"]
         }
       })
     },

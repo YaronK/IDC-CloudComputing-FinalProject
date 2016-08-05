@@ -35,6 +35,8 @@ function initializeGraph(resultId) {
         });
         setRadioButtonValue(firstFeatureName, 0);
         setRadioButtonValue(secondFeatureName, 1);
+
+        displayGraph();
     });
 }
 
@@ -42,7 +44,7 @@ function displayGraph() {
     var firstFeature = getRadioButtonValue(firstFeatureName);
     var secondFeature = getRadioButtonValue(secondFeatureName);
 
-    d3.select("body").select("svg").remove();
+    d3.select("#graph").select("svg").remove();
 
     var margin = { top: 20, right: 20, bottom: 30, left: 40 },
         width = 960 - margin.left - margin.right,
@@ -64,7 +66,7 @@ function displayGraph() {
         .scale(y)
         .orient("left");
 
-    var svg = d3.select("body").append("svg")
+    var svg = d3.select("#graph").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")

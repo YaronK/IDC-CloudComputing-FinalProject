@@ -4,15 +4,23 @@ html
     title Clustering Madness
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
-    h1 Clustering Madness
-    h2 Cloud Computing, IDC, Final Project
-    h3 Yaron Kaner, Gilad Levy
-    table(style={"margin-bottom": "20px"})
+    table(class="screen_wide" style={"height": "90vh"})
+      tr(style={"height": "10vh"})
+        td(colspan="3", style={"text-align": "center"})
+          p
+            font(size="40") Clustering Madness
+      tr(style={"height": "5vh"})
+        td(class=upload_dataset_td)
+          a(class=upload_dataset_a href='/upload-dataset') Upload a dataset
+        td(class=cluster_dataset_td)
+          a(class=cluster_dataset_a href='/cluster-dataset') Cluster a dataset
+        td(class=all_results_td)
+          a(class=all_results_a href='/all-results') View clustering results
       tr
-        td
-          a(href='/upload-dataset') Upload a dataset
-        td
-          a(href='/cluster-dataset', style={"margin-left": "20px"}) Cluster a dataset
-        td
-          a(href='/all-results', style={"margin-left": "20px"}) View clustering results
-    block content
+        td(colspan="3", style={"vertical-align": "top"})
+          block content
+      tr(style={"height": "5vh"})
+        td(colspan="3")
+          span Cloud Computing, IDC, Final Project
+          span(style={"float": "right"}) Yaron Kaner, Gilad Levy
+

@@ -1,15 +1,25 @@
 extends layout
 
 block content
-  h4= "Reuslt: " + resultId
-  script(src="https://d3js.org/d3.v3.js")
-  form(action="#" onSubmit="displayGraph();return false;")
-    table(id="features")
-      tr
-        td 
-          b First feature
-        td
-          b Second feature
-    input(type="submit", value="Display")
-  script(src="/scripts/display-graph.js")
-  script initializeGraph( "#{resultId}" )
+  table(class="screen_wide")
+    tr(style={"height": "5vh"})
+      td
+    tr
+      td
+        script(src="https://d3js.org/d3.v3.js")
+        form(action="#" onSubmit="displayGraph();return false;")
+          center
+            table
+              tr
+                td(style={"vertical-align": "top"})
+                  h4= "Reuslt: " + resultId
+                  table(id="features")
+                    tr
+                      td 
+                        b First feature
+                      td
+                        b Second feature
+                  input(type="submit", value="Display")
+                td(id="graph")
+        script(src="/scripts/display-graph.js")
+        script initializeGraph( "#{resultId}" )

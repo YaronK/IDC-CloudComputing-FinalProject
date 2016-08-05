@@ -1,63 +1,51 @@
 extends layout
 
 block content
-  h4 Cluster a dataset
   form(method="post", content-type="application/json")
-    if message
-      h5= message
-    else
-      table
-        tr
-          td Dateset name:
-          td
-            select(name="dataset-name" required)
-              each dataset_name in dataset_names ? dataset_names : []
-                option(value=dataset_name)= dataset_name
-        tr
-          td Clustering method:
-          td
-            input(type="radio", name="clustering-method", value="k-means", checked)
-            span k-means
-        tr
-          td
-          td
-          td
-            span K-Mean Parameters
-        tr
-          td
-          td
-          td
-          td
-            span k:
-            input(type="text", name="k-means-k", value=3)
-        tr
-          td 
-          td 
-            input(type="radio", name="clustering-method", value="DBSCAN", checked)
-            span DBSCAN
-        tr
-          td
-          td
-            input(type="radio", name="clustering-method", value="OPTIC", checked)
-            span Optic
-        tr
-          td
-          td
-          td DBSCAN/Optic Paramaters
-        tr
-          td
-          td
-          td
-          td
-            span Cluster Radius:
-            input(type="text", name="clusterRadius", value=0.3)
-        tr
-          td
-          td
-          td
-          td
-            span Cluster Members:
-            input(type="text", name="clusterMembers", value=4)
-        tr
-          td
-            input(type="submit", value="Submit")
+    table(class="screen_wide")
+      tr
+        td(class="tab_wide")
+        td(class="tab_wide content_tab")
+          if message
+            h5= message
+          else
+            table
+              tr
+                td Select a dataset:
+                td(colspan="2")
+                  select(name="dataset-name" required)
+                    each dataset_name in dataset_names ? dataset_names : []
+                      option(value=dataset_name)= dataset_name
+              tr
+                td(colspan="3") Select clustering method and parameters:
+              tr
+                td
+                  input(type="radio", name="clustering-method", value="k-means", checked)
+                  span K-Means
+                td(colspan="2")
+                  span K:
+                  input(class="parameter_width" type="text", name="k-means-k", value=3)
+              tr
+                td 
+                  input(type="radio", name="clustering-method", value="DBSCAN", checked)
+                  span DBSCAN
+                td
+                  span Cluster Radius:
+                  input(class="parameter_width" type="text", name="DBSCANclusterRadius", value=0.3)
+                td
+                  span Cluster Members:
+                  input(class="parameter_width" type="text", name="DBSCANclusterMembers", value=4)
+              tr
+                td
+                  input(type="radio", name="clustering-method", value="OPTIC", checked)
+                  span Optic
+                td
+                  span Cluster Radius:
+                  input(class="parameter_width" type="text", name="OPTICclusterRadius", value=0.3)
+                td
+                  span Cluster Members:
+                  input(class="parameter_width" type="text", name="OPTICclusterMembers", value=4)
+              tr
+                td
+                  input(type="submit", value="Submit")
+        td(class="tab_wide")
