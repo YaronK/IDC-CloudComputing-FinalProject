@@ -39,3 +39,8 @@ jspm_packages
 Worker/.vscode/launch.json
 WebServer/.vscode/launch.json
 WebServer/uploads/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
