@@ -18,98 +18,58 @@ AWS.config.region = config.aws.region;
 
 var s3 = new AWS.S3({ params: { Bucket: config.aws.s3.bucket } });
 
-app.get('/', bodyParser.json(), function (request, response) {
-    sendSMS("iris.csv", "k-means");
-    response.status(200).end();
-});
-
 app.post('/', bodyParser.json(), function (request, response) {
-    console.log("Recieved post request, initating worker");
     var inputFilePath = "datasets/" + request.body.dataset;
+    log("Recieved post request: " + inputFilePath);
 
-    // Fetching requested object
     s3.getObject({ Key: inputFilePath }, function (err, data) {
-        if (err) console.log(err, err.stack);
+        if (err) log(err);
         else {
-            console.log("Succeeded reading csv file from s3");
+            log("Fetched csv file from s3.");
             csvParse(data.Body.toString(), {}, function (err, data) {
-                firstRow = data.shift();
-                initiateClustering(request, response, data, firstRow, inputFilePath)
+                clusterData(request, response, inputFilePath, data);
             });
         };
     });
 });
 
-function initiateClustering(request, response, data, firstRow, inputFilePath) {
-    console.log("Initating clustering method");
+function clusterData(request, response, inputFilePath, data) {
+    var firstRow = data.shift();
     var method = request.body.method.toString();
+    var params = request.body.params;
+
     sendSMS(inputFilePath, method);
-    console.log("Starting " + method + " Clustering, with " + inputFilePath + " as dataset");
 
-    if (request.body.method.toString() == "k-means") {
-        var kNum = request.body.params.kNum,
-            outputFilePath = inputFilePath.replace('datasets/', 'results/').replace('csv', method + "." + kNum + ".csv");
+    log("Starting " + method + " Clustering, with " + inputFilePath + " as dataset");
 
-        kMeansClustering(data, firstRow, kNum, outputFilePath, response);
+    if (method == "k-means") {
+        var kNum = params.kNum;
+        var resultFilePath = inputFilePath.replace('datasets/', 'results/').replace('csv', method + "." + kNum + ".csv");
+
+        kMeansClustering(data, firstRow, kNum, resultFilePath, response);
     }
-    // Method is ether DBSCAN or OPTIC
     else {
-        var clusterRadius = request.body.params.clusterRadius,
-            clusterMembers = request.body.params.clusterMembers,
-            outputFilePath = inputFilePath.replace('datasets/', 'results/').replace('csv', method + "." +
-                clusterRadius + "." + clusterMembers + ".csv");
+        var clusterRadius = params.clusterRadius;
+        var clusterMembers = params.clusterMembers;
+        var resultFilePath = inputFilePath.replace('datasets/', 'results/').replace('csv', method + "." + clusterRadius + "." + clusterMembers + ".csv");
 
-        if (request.body.method.toString() == "DBSCAN") {
-            DbscanClustering(data, firstRow, outputFilePath, response, clusterRadius, clusterMembers);
-        };
-
-        if (request.body.method.toString() == "OPTIC") {
-            OpticClustering(data, firstRow, outputFilePath, response, clusterRadius, clusterMembers);
-        };
-    };
-}
-
-function DbscanClustering(data, firstRow, outputFilePath, response, clusterRadius, clusterMembers) {
-    console.log("Performing DBSCAN Clustering");
-    var dbscan = new clustering.DBSCAN();
-    var result = data;
-
-    var clusters = dbscan.run(data, clusterRadius, clusterMembers);
-
-    RefactoringResults(clusters, firstRow, result, outputFilePath);
-}
-
-function OpticClustering(data, firstRow, outputFilePath, response, clusterRadius, clusterMembers) {
-    console.log("Performing Optic Clustering");
-
-    var optics = new clustering.OPTICS();
-    var result = data;
-
-    var clusters = optics.run(data, 600, 20);
-    var plot = optics.getReachabilityPlot();
-
-    RefactoringResults(clusters, firstRow, result, outputFilePath, response);
-}
-
-function RefactoringResults(clusters, firstRow, result, outputFilePath, response) {
-    for (var i = 0; i < clusters.length; i++) {
-        cluster = clusters[i];
-        for (var j = 0; j < cluster.length; j++) {
-            clusterMember = cluster[j];
-            var clusterName = "Cluster " + (i).toString();
-            result[clusterMember].push(clusterName);
+        if (method == "DBSCAN") {
+            dbscanClustering(data, firstRow, resultFilePath, response, clusterRadius, clusterMembers);
+        }
+        else //(method == "OPTIC") 
+        {
+            opticClustering(data, firstRow, resultFilePath, response, clusterRadius, clusterMembers);
         };
     };
-
-    UploadingResults(firstRow, result, outputFilePath, response);
 }
+
 function kMeansClustering(data, firstRow, kNum, outputFilePath, response) {
-    console.log("Performing K Means Clustering");
+    log("Performing K Means Clustering");
     var vectors = data;
     var result = data;
 
     kmeans.clusterize(vectors, { k: kNum }, (err, res) => {
-        if (err) console.error(err);
+        if (err) log(err);
         else {
             for (var i = 0; i < res.length; i++) {
                 clusterIds = res[i].clusterInd;
@@ -119,13 +79,47 @@ function kMeansClustering(data, firstRow, kNum, outputFilePath, response) {
                     result[clusterId].push(clusterName);
                 };
             };
-            UploadingResults(firstRow, result, outputFilePath, response);
+            uploadResults(firstRow, result, outputFilePath, response);
         }
     });
 }
 
-function UploadingResults(firstRow, result, outputFilePath, response) {
-    console.log("Uploading Results");
+function dbscanClustering(data, firstRow, outputFilePath, response, clusterRadius, clusterMembers) {
+    log("Performing DBSCAN Clustering");
+    var dbscan = new clustering.DBSCAN();
+    var result = data;
+
+    var clusters = dbscan.run(data, clusterRadius, clusterMembers);
+
+    refactorResults(clusters, firstRow, result, outputFilePath);
+}
+
+function opticClustering(data, firstRow, outputFilePath, response, clusterRadius, clusterMembers) {
+    log("Performing Optic Clustering");
+
+    var optics = new clustering.OPTICS();
+    var result = data;
+
+    var clusters = optics.run(data, 600, 20);
+
+    refactorResults(clusters, firstRow, result, outputFilePath, response);
+}
+
+function refactorResults(clusters, firstRow, result, outputFilePath, response) {
+    for (var i = 0; i < clusters.length; i++) {
+        cluster = clusters[i];
+        for (var j = 0; j < cluster.length; j++) {
+            clusterMember = cluster[j];
+            var clusterName = "Cluster " + (i).toString();
+            result[clusterMember].push(clusterName);
+        };
+    };
+
+    uploadResults(firstRow, result, outputFilePath, response);
+}
+
+function uploadResults(firstRow, result, outputFilePath, response) {
+    log("Uploading Results");
     // Create first row of parameters
     firstRow.push("clusterIndex");
     result.unshift(firstRow);
@@ -137,20 +131,14 @@ function UploadingResults(firstRow, result, outputFilePath, response) {
         lineArray.push(index == 0 ? "" + line : line);
     });
 
-    // Uplocad csv to S3
-    var uploadParams = {
-        Key: outputFilePath,
-        Body: lineArray.join("\n")
-    };
-
-    var put = s3.putObject(uploadParams, function (err, data) {
-        console.log("Successfully uploaded csv to s3");
+    s3.putObject({ Key: outputFilePath, Body: lineArray.join("\n") }, function (err) {
+        log("Successfully uploaded csv to s3");
         response.status(200).end();
     });
 }
 
 function sendSMS(dataset, method) {
-    console.log("Trying to send SMS");
+    log("Trying to send SMS");
     var sns = new AWS.SNS({ region: 'us-west-2' });
     sns.publish({
         TargetArn: 'arn:aws:sns:us-west-2:079044478150:idc_cloudComputing_YaronKaner_GiladLevy_FP',
@@ -159,10 +147,9 @@ function sendSMS(dataset, method) {
     },
         function (err, data) {
             if (err) {
-                console.log("Error sending a message " + err);
+                log("Error sending a message " + err);
             } else {
-                console.log("Sent message: " + data.MessageId);
-
+                log("Sent message: " + data.MessageId);
             }
         });
 }
