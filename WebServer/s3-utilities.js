@@ -26,7 +26,7 @@ function tryGetKeyFromCache(key, onDataCallback, getDataCallback) {
             else { log("{0} was not found in cache.".format(key)); }
             getDataCallback(function (data) {
                 log("Setting {0} from cache.".format(key));
-                redisClient.set(key, JSON.stringify(data), function () { redisClient.expire(key, 10); });
+                redisClient.set(key, JSON.stringify(data), function () { redisClient.expire(key, 5); });
                 onDataCallback(data);
             });
         }
